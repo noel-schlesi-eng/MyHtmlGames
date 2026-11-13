@@ -1,0 +1,7 @@
+{
+  "appId": "com.marea.unbound",
+  "appName": "UNBOUND",
+  "webDir": "www",
+  "backgroundColor": "#0b1a22",
+  "android": { "allowMixedContent": false }
+}

@@ -1,7 +1,7 @@
 {
-  "appId": "com.marea.unbound",
-  "appName": "UNBOUND",
+  "appId": "com.voxelcraft.app",
+  "appName": "Voxelcraft",
   "webDir": "www",
-  "backgroundColor": "#0b1a22",
+  "backgroundColor": "#000000",
   "android": { "allowMixedContent": false }
 }

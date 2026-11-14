@@ -1,7 +1,6 @@
-# UNBOUND
+# Voxelcraft
 
-Open-World-Fahrspiel auf der Insel Marea (ohne Waffen, ohne Gewalt).
-Das Spiel steckt komplett in `www/index.html`; GitHub Actions baut daraus eine Android-APK.
+Voxel-Sandbox im Stil klassischer Blockwelten. Das Spiel steckt komplett in `www/index.html`; GitHub Actions baut daraus eine Android-APK.
 
-APK herunterladen: Reiter **Releases** -> `UNBOUND.apk`.
+APK herunterladen: Reiter **Releases** -> `Voxelcraft.apk` (Release `voxelcraft-latest`).
 Installieren: APK auf dem Handy öffnen und "Unbekannte Quellen" erlauben.

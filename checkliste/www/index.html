@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mitspieler-Aufgaben Checkliste</title>
+<style>
+  :root { color-scheme: light dark; --bg:#faf7ee; --card:#fff6a8; --dark:#222; --ink:#1d1d1d; --ok:#1f9d4c; --no:#d6322b; --mut:#8a8a8a; }
+  @media (prefers-color-scheme: dark){ :root{ --bg:#1b1b1b; --ink:#f2f2f2; --mut:#999; } }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);padding:16px;max-width:640px;margin-inline:auto}
+  h1{font-size:1.3rem;margin:4px 0 4px}
+  .stats{font-size:.9rem;color:var(--mut);margin-bottom:14px}
+  .item{display:flex;align-items:center;gap:10px;background:var(--card);color:#1d1d1d;border-radius:14px;padding:12px;margin-bottom:10px;border:3px solid transparent;transition:border-color .15s}
+  .item.dark{background:var(--dark);color:#fff}
+  .item.ok{border-color:var(--ok)}
+  .item.no{border-color:var(--no)}
+  .ico{font-size:1.8rem;width:2.2rem;text-align:center;flex:none}
+  .txt{flex:1;font-size:.98rem;line-height:1.35}
+  .btns{display:flex;flex-direction:column;gap:6px;flex:none}
+  button{width:44px;height:44px;border-radius:12px;border:2px solid #0003;background:#fff;font-size:1.4rem;cursor:pointer;color:#999;line-height:1}
+  button.ok.on{background:var(--ok);color:#fff;border-color:var(--ok)}
+  button.no.on{background:var(--no);color:#fff;border-color:var(--no)}
+  .reset{margin-top:8px;width:auto;height:auto;padding:10px 14px;font-size:.9rem;color:var(--ink);background:transparent}
+  .st{font-size:.75rem;color:var(--mut);margin-top:6px}
+</style>
+</head>
+<body>
+<h1>Mitspieler-Aufgaben</h1>
+<div class="stats" id="stats"></div>
+<div id="list"></div>
+<button class="reset" id="reset">Alles zurücksetzen</button>
+<div class="st" id="st"></div>
+<details style="margin-top:14px"><summary style="cursor:pointer;font-size:.9rem">Stand übertragen (Export / Import)</summary>
+  <p class="st">Export: Code kopieren. Import: Code einfügen und auf „Importieren“ tippen – z. B. in einer neuen App.</p>
+  <textarea id="xfer" rows="3" style="width:100%;font-family:monospace"></textarea>
+  <button class="reset" id="exp">Code anzeigen</button>
+  <button class="reset" id="imp">Importieren</button>
+</details>
+
+<script>
+const ITEMS = [
+  {i:"🗣️", t:"Bring einen Mitspieler dazu, etwas mit einem ausländischen Akzent zu sagen."},
+  {i:"💩🍆", t:"Bring einen Mitspieler dazu, eine Bemerkung zu den Emojis in deiner Nachricht zu machen (ohne ihn aufzufordern)."},
+  {i:"🛌", t:"Bring einen Mitspieler dazu, sich mit dir auf den Boden zu legen."},
+  {i:"🍔", t:"Bring einen Mitspieler dazu, etwas zu probieren, das du gerade isst."},
+  {i:"🦌", t:"Bring einen Mitspieler dazu, ein Rehgeräusch zu machen, indem du ihm sagst, dass Rehe keine Geräusche machen."},
+  {i:"❗", t:"Sag zu einem Mitspieler: „Weißt du was?“. Wenn er antwortet: „Was?“, dann entgegnest du: „Erwischt!“ und zeigst diese Karte.", dark:true},
+  {i:"📅", t:"Bring einen Mitspieler dazu, dich in Bezug auf den Wochentag zu korrigieren."},
+  {i:"😴", t:"Tu so, als wärst du eingeschlafen und bring einen Mitspieler dazu, eine Bemerkung zu machen."},
+  {i:"🏺", t:"Bring einen Mitspieler dazu, etwas kaputt zu machen."},
+  {i:"📱", t:"Nimm das Handy eines Mitspielers, mach ein Foto von dieser Karte und stell es als Hintergrund ein, ohne erwischt zu werden."},
+  {i:"💃", t:"Bring einen Spieler dazu zu tanzen."},
+  {i:"🛒", t:"Erfinde ein Produkt. Überzeuge einen Mitspieler, dass er es braucht und bring ihn dazu, im Internet danach zu suchen."},
+  {i:"❌", t:"Bring einen Mitspieler dazu, zu sagen: „Du liegst falsch.“"},
+  {i:"💊", t:"Bring einen Mitspieler dazu, dir ein Schmerzmittel zu geben."},
+  {i:"👄", t:"Erfinde ein Sprichwort und verwende es in einem Gespräch. Bring einen Mitspieler dazu, zu fragen, was es bedeutet."},
+  {i:"🎨", t:"Bring einen Mitspieler dazu, sich mit dir über die Farbe von etwas zu streiten."},
+  {i:"👟", t:"Kleb diese Karte an die Schuhsohle eines Mitspielers und bring ihn dazu, sie zu finden."},
+  {i:"✅", t:"Frag einen Spieler um Erlaubnis, etwas zu tun. Wenn er ja sagt, zeig ihm diese Karte."},
+  {i:"🧭", t:"Bring einen Mitspieler dazu, mit dir darüber zu streiten, wo Norden ist."},
+  {i:"🔤", t:"Bring einen Mitspieler dazu, seinen Namen zu buchstabieren (entweder Vor- oder Nachname)."},
+  {i:"🦟", t:"Sag, dass es dich am Körper juckt und fang vor einem Mitspieler an, dich zu kratzen. Bring ihn dazu, sich selbst zu kratzen."},
+  {i:"🤪", t:"Ziehe gegenüber einem Mitspieler eine Grimasse. Wenn er mit einer Grimasse reagiert, zeig ihm diese Karte."},
+  {i:"🧮", t:"Bring einen Mitspieler dazu, deine Matheberechnung zu korrigieren."}
+];
+const KEY = "mitspieler-checkliste-v1";
+let state = {};      // index -> "ok" | "no"
+let save = () => {}; // set when db is ready
+const $ = id => document.getElementById(id);
+
+function lsGet(){ try { return JSON.parse(localStorage.getItem(KEY)||"{}"); } catch(e){ return {}; } }
+function lsSet(){ try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(e){} }
+
+function render(){
+  const list = $("list"); list.innerHTML = "";
+  ITEMS.forEach((it, n) => {
+    const s = state[n];
+    const d = document.createElement("div");
+    d.className = "item" + (it.dark ? " dark" : "") + (s ? " " + s : "");
+    d.innerHTML = '<div class="ico">'+it.i+'</div><div class="txt"></div><div class="btns"></div>';
+    d.querySelector(".txt").textContent = it.t;
+    const b = d.querySelector(".btns");
+    [["ok","✓","Geschafft"],["no","✗","Nicht geschafft"]].forEach(([k,sym,label]) => {
+      const x = document.createElement("button");
+      x.className = k + (s === k ? " on" : "");
+      x.textContent = sym; x.setAttribute("aria-label", label);
+      x.onclick = () => { if (state[n] === k) delete state[n]; else state[n] = k; changed(); };
+      b.appendChild(x);
+    });
+    list.appendChild(d);
+  });
+  const ok = Object.values(state).filter(v=>v==="ok").length;
+  const no = Object.values(state).filter(v=>v==="no").length;
+  $("stats").textContent = "✓ " + ok + "  ·  ✗ " + no + "  ·  offen " + (ITEMS.length-ok-no);
+}
+function changed(){ lsSet(); save(); render(); }
+
+$("reset").onclick = () => { if ($("reset").dataset.arm === "1") { state = {}; $("reset").dataset.arm=""; $("reset").textContent="Alles zurücksetzen"; changed(); } else { $("reset").dataset.arm="1"; $("reset").textContent="Wirklich alles löschen? Nochmal tippen"; setTimeout(()=>{$("reset").dataset.arm="";$("reset").textContent="Alles zurücksetzen";},4000);} };
+
+$("exp").onclick = () => { $("xfer").value = JSON.stringify(state); $("xfer").select(); };
+$("imp").onclick = () => {
+  try {
+    const o = JSON.parse($("xfer").value), n = {};
+    Object.keys(o).forEach(k => { if ((o[k]==="ok"||o[k]==="no") && ITEMS[k]) n[k]=o[k]; });
+    state = n; changed(); $("xfer").value = "";
+  } catch(e) { $("xfer").value = "Ungültiger Code"; }
+};
+
+state = lsGet();
+render();
+
+(async () => {
+  try {
+    const user = await claude.use("user");
+    const db = await claude.use("db");
+    if (!user || !db) { $("st").textContent = "Gespeichert in diesem Browser."; return; }
+    const id = await user.id();
+    const ref = db.collection("data/users/" + id).doc("checkliste");
+    const snap = await ref.get();
+    const remote = snap && snap.exists ? (snap.data ? snap.data() : snap) : null;
+    if (remote && remote.state) { state = Object.assign({}, remote.state); lsSet(); }
+    else if (Object.keys(state).length) { await ref.set({state}); }
+    save = () => { ref.set({state}).catch(()=>{ $("st").textContent = "Speichern fehlgeschlagen – lokal gesichert."; }); };
+    $("st").textContent = "Automatisch gespeichert (auf allen deinen Geräten).";
+    render();
+  } catch(e) { $("st").textContent = "Gespeichert in diesem Browser."; }
+})();
+</script>
+</body>
+</html>

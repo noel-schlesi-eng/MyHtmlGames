@@ -1,0 +1,63 @@
+name: Build FREEBOUND APK
+
+on:
+  push:
+    branches: [freebound]
+    paths: ['freebound/**', '.github/workflows/freebound-apk.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: freebound
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Landscape, Vollbild und ohne Internet-Berechtigung
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' "$M"
+          sed -i '/android.permission.INTERNET/d' "$M"
+          S=android/app/src/main/res/values/styles.xml
+          sed -i '0,/<style name="AppTheme.NoActionBar"[^>]*>/s||&\n        <item name="android:windowFullscreen">true</item>\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>|' "$S"
+
+      - name: Build debug APK
+        working-directory: freebound/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Freebound.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Freebound-apk
+          path: freebound/Freebound.apk
+
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: freebound-latest
+          name: FREEBOUND (neueste Version)
+          files: freebound/Freebound.apk

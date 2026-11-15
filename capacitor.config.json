@@ -1,7 +1,7 @@
 {
-  "appId": "com.marea.unbound",
-  "appName": "UNBOUND",
+  "appId": "com.noel.flip7",
+  "appName": "Flip 7",
   "webDir": "www",
-  "backgroundColor": "#0b1a22",
+  "backgroundColor": "#0b0718",
   "android": { "allowMixedContent": false }
 }

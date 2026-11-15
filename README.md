@@ -1,7 +1,7 @@
-# UNBOUND
+# Flip 7
 
-Open-World-Fahrspiel auf der Insel Marea (ohne Waffen, ohne Gewalt).
-Das Spiel steckt komplett in `www/index.html`; GitHub Actions baut daraus eine Android-APK.
+Push-your-luck-Kartenspiel für ein Handy, hochkant, gegen Bots oder mehrere Menschen am selben Gerät.
+Das Spiel steckt komplett in `www/index.html` (eine Datei, keine externen Abhängigkeiten).
 
-APK herunterladen: Reiter **Releases** -> `UNBOUND.apk`.
+APK: Reiter **Releases** -> `Flip7.apk` (Tag `flip7-latest`).
 Installieren: APK auf dem Handy öffnen und "Unbekannte Quellen" erlauben.

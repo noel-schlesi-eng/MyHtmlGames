@@ -1,8 +1,8 @@
-name: Build Android APK
+name: Build Flip 7 APK
 
 on:
   push:
-    branches: [main, master]
+    branches: [flip7]
   workflow_dispatch:
 
 permissions:
@@ -31,30 +31,39 @@ jobs:
           npx cap add android
           npx cap sync android
 
-      - name: Landscape + fullscreen
+      - name: Hochkant, Vollbild, Vibration
         run: |
-          M=android/app/src/main/AndroidManifest.xml
-          sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' "$M"
-          S=android/app/src/main/res/values/styles.xml
-          sed -i 's|<style name="AppTheme.NoActionBarLaunch"|<style name="AppTheme.NoActionBarLaunch"|' "$S"
-          sed -i '0,/<style name="AppTheme.NoActionBar"[^>]*>/s||&\n        <item name="android:windowFullscreen">true</item>\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>|' "$S"
-          cat "$S"
+          python3 - <<'PY'
+          import re
+          m = 'android/app/src/main/AndroidManifest.xml'
+          s = open(m, encoding='utf-8').read()
+          s = re.sub(r'<activity(\s)', r'<activity android:screenOrientation="portrait"\1', s, count=1)
+          if 'android.permission.VIBRATE' not in s:
+              s = re.sub(r'(<manifest[^>]*>)', r'\1\n    <uses-permission android:name="android.permission.VIBRATE"/>', s, count=1)
+          open(m, 'w', encoding='utf-8').write(s)
+          st = 'android/app/src/main/res/values/styles.xml'
+          t = open(st, encoding='utf-8').read()
+          t = re.sub(r'(<style name="AppTheme\.NoActionBar"[^>]*>)',
+                     r'\1\n        <item name="android:windowFullscreen">true</item>\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>', t, count=1)
+          open(st, 'w', encoding='utf-8').write(t)
+          print(open(m, encoding='utf-8').read()[:800])
+          PY
 
       - name: Build debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon
 
       - name: Rename APK
-        run: cp android/app/build/outputs/apk/debug/app-debug.apk UNBOUND.apk
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Flip7.apk
 
       - uses: actions/upload-artifact@v4
         with:
-          name: UNBOUND-apk
-          path: UNBOUND.apk
+          name: Flip7-apk
+          path: Flip7.apk
 
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: latest
-          name: UNBOUND (neueste Version)
-          files: UNBOUND.apk
+          tag_name: flip7-latest
+          name: Flip 7 (neueste Version)
+          files: Flip7.apk

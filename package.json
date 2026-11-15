@@ -1,8 +1,8 @@
 {
-  "name": "unbound-game",
+  "name": "flip7-game",
   "version": "1.0.0",
   "private": true,
-  "description": "UNBOUND - open-world driving game (Android wrapper)",
+  "description": "Flip 7 - Kartenspiel (Android-Wrapper)",
   "dependencies": {
     "@capacitor/android": "^6.2.0",
     "@capacitor/cli": "^6.2.0",

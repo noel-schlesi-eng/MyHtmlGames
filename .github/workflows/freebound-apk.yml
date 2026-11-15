@@ -41,7 +41,7 @@ jobs:
           sed -i 's|<activity|<activity android:screenOrientation="sensorLandscape"|' "$M"
           sed -i '/android.permission.INTERNET/d' "$M"
           S=android/app/src/main/res/values/styles.xml
-          sed -i '0,/<style name="AppTheme.NoActionBar"[^>]*>/s||&\n        <item name="android:windowFullscreen">true</item>\n        <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>|' "$S"
+          sed -i '0,/<style name="AppTheme.NoActionBar"[^>]*>/s||&\n        <item name="android:windowFullscreen">true</item>\n        <item name="android:windowLayoutInDisplayCutoutMode">never</item>|' "$S"
 
       - name: Build debug APK
         working-directory: freebound/android

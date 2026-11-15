@@ -1,0 +1,57 @@
+name: Build Nova Phone APK
+
+on:
+  push:
+    branches: [phone-os]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: |
+          npx cap add android
+          npx cap sync android
+
+      - name: Portrait orientation and immersive MainActivity
+        run: |
+          python3 - <<'PY'
+          import re
+          p='android/app/src/main/AndroidManifest.xml'
+          s=open(p,encoding='utf-8').read()
+          s2=re.sub(r'(<activity\b[^>]*android:name="\.MainActivity")', r'\1 android:screenOrientation="portrait"', s, count=1)
+          assert s2!=s, 'MainActivity not patched'
+          open(p,'w',encoding='utf-8').write(s2)
+          PY
+          mkdir -p android/app/src/main/java/com/nova/phoneos
+          cp android-overrides/MainActivity.java android/app/src/main/java/com/nova/phoneos/MainActivity.java
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk NovaPhone.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: NovaPhone-apk
+          path: NovaPhone.apk
